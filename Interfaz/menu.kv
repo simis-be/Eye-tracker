@@ -1,0 +1,116 @@
+<MenuPrincipal>:
+    orientation: 'vertical'
+    padding: 30
+    spacing: 30
+
+    canvas.before:
+        Color:
+            rgba: 0.1, 0.1, 0.2, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # Título
+    Label:
+        text: "Eye Tracker - Accesibilidad"
+        font_size: '30sp'
+        color: 0.9, 0.9, 1, 1
+        size_hint_y: 0.1
+
+    # Estado del Tracker
+    Label:
+        id: estado_label
+        text: root.estado_tracker
+        font_size: '22sp'
+        bold: True
+        size_hint_y: 0.1
+        color: 1, 0.5, 0.5, 1
+
+    # Controles
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 20
+        padding: 20
+        size_hint_y: 0.6
+        
+        # Sensibilidad Horizontal
+        BoxLayout:
+            size_hint_y: None
+            height: 40
+            Label:
+                text: "Sensibilidad Horizontal:"
+                color: 1, 1, 1, 1
+                size_hint_x: 0.4
+            Slider:
+                id: slider_h
+                min: 10
+                max: 100
+                on_value: root.on_sensibilidad_h_change(self.value)
+                
+        
+        # Sensibilidad Vertical
+        BoxLayout:
+            size_hint_y: None
+            height: 40
+            Label:
+                text: "Sensibilidad Vertical:"
+                color: 1, 1, 1, 1
+                size_hint_x: 0.4
+            Slider:
+                id: slider_v
+                min: 10
+                max: 100
+                on_value: root.on_sensibilidad_v_change(self.value)
+
+        BoxLayout:
+            size_hint_y: None
+            height:40
+            Label:
+                text: "Velocidad Horizontal:"
+                color: 1, 1, 1, 1
+                size_hint_x: 0.4
+
+            Slider:
+                id: slider_speed_h
+                min: 10
+                max: 100
+                on_value: root.on_velocidad_h_change(self.value)
+
+        BoxLayout:
+            size_hint_y: None
+            height:40
+            Label:
+                text: "Velocidad Vertical:"
+                color: 1, 1, 1, 1
+                size_hint_x: 0.4
+
+            Slider:
+                id: slider_speed_v
+                min: 10
+                max: 100
+                on_value: root.on_velocidad_v_change(self.value)
+
+
+        Button:
+            id: btn_principal
+            text: "Iniciar"
+            font_size: '20sp'
+            size_hint: (0.7, 0.4)
+            pos_hint: {'center_x': 0.5}
+            background_color: 0.2, 0.8, 0.2, 1 # Verde por defecto
+            on_press: root.controlar_tracker('detener' if self.text == 'Detener' else 'iniciar')
+
+        
+
+        # Botón de Recalibración
+        Button:
+            text: "Recalibrar"
+            font_size: '20sp'
+            size_hint: (0.7, 0.4)
+            pos_hint: {'center_x': 0.5}
+            background_color: 0.2, 0.4, 0.8, 0.8
+            on_press: root.controlar_tracker('recalibrar')
+
+    # Espacio en blanco para empujar los elementos hacia arriba
+    Widget:
+        size_hint_y: 0.2
