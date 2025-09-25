@@ -1,13 +1,7 @@
-# Eye-tracker 2 Final
-Este es mi trabajo de fin de grado, un eye-tracker que incluye las siguientes librerias:
-Kivy para la intefaz
-pathlib
-cv2
-pyautogui
-time
-numpy
-
-# Eye-Tracker Python
+# Eye-tracker 1 
+- no incluye interfaz y cambios de calibración
+- 
+# Eye-Tracker 2
 
 Este proyecto implementa un sistema de seguimiento ocular (eye-tracker) utilizando Python. Permite estimar la dirección de la mirada, detectar fijaciones y mostrar un mapa de fijaciones, con una interfaz gráfica interactiva para controlar parámetros de sensibilidad y velocidad.
 
