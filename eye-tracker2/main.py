@@ -13,10 +13,51 @@ from collections import deque
 import pyautogui
 import time
 import numpy as np
+from estadisticas import CalibrationLogger
 
 pyautogui.FAILSAFE = False 
 ACTIVE_REGION = None  # None = pantalla completa; o {'x':0, 'y':0, 'w':960, 'h':1080}
 REGION_TIMEOUT = 1.5  # segundos de fijación para cambiar de región
+
+
+def move_cursor_and_get_pos(stabilized_gaze, velocidad_h, velocidad_v):
+    """
+    Calcula la nueva posición del cursor, aplica las restricciones de velocidad y límites de pantalla, 
+    mueve el cursor y devuelve la posición final (x, y).
+    """
+    if stabilized_gaze is None:
+        return None # No mover ni registrar si no hay datos estables
+
+    current_cursor_pos = pyautogui.position()
+    target_x = stabilized_gaze[0]
+    target_y = stabilized_gaze[1]
+
+    # 1. Aplicar la limitación de velocidad
+    gain_x = velocidad_h / 50.0  
+    gain_y = velocidad_v / 50.0
+
+    move_x = (target_x - current_cursor_pos[0]) * gain_x
+    move_y = (target_y - current_cursor_pos[1]) * gain_y
+
+    max_move_per_frame = 150 
+    final_move_x = np.clip(move_x, -max_move_per_frame, max_move_per_frame)
+    final_move_y = np.clip(move_y, -max_move_per_frame, max_move_per_frame) 
+
+    # Aplicar movimiento
+    new_x = current_cursor_pos[0] + final_move_x
+    new_y = current_cursor_pos[1] + final_move_y
+
+    # 2. Restringir la posición a los límites de la pantalla
+    screen_w, screen_h = pyautogui.size()
+    final_x = int(max(0, min(screen_w - 1, new_x)))
+    final_y = int(max(0, min(screen_h - 1, new_y)))
+
+    # 3. Mover el puntero
+    pyautogui.moveTo(final_x, final_y, duration=0.01, _pause=False)
+    
+    # 4. Devolver la posición final (clave para el logger)
+    return (final_x, final_y)
+
 
 
 def initialize_system(cap, face_cascade, eye_cascade):
@@ -103,6 +144,10 @@ if Path("tracker_command.json").exists():
     except:
         pass
     
+logger = CalibrationLogger(filename="precision_test.csv")
+MODE = "TESTING"  # O "OPERATIONAL" cuando no se necesite registro de precisión
+current_target = (960, 540) # Punto de prueba (debe coincidir con el punto visual de la prueba, e.g., el centro)
+
 
 while True:
     
@@ -190,6 +235,10 @@ while True:
         # Opcional: resetear fijación para evitar clics múltiples
                  gaze_stabilizer.fixation_detector.current_fixation_frames = 0
 
+
+            
+
+
             # Dibujar todas las fijaciones detectadas
             fixation_map = gaze_stabilizer.get_fixation_map()
             for pos in fixation_map:
@@ -211,6 +260,21 @@ while True:
                 fps = frame_count / elapsed_time
                 cv2.putText(frame, f"FPS: {fps:.1f}", 
                            (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                
+            # --- MOVIMIENTO Y REGISTRO DE DATOS (MODIFICACIÓN/ADICIÓN CLAVE) ---
+            # 1. Mover el cursor y obtener la posición final (final_x, final_y)
+            final_cursor_position = move_cursor_and_get_pos(stabilized_gaze, velocidad_h, velocidad_v)
+            
+            
+            # 2. Registrar los datos si estamos en modo de prueba (TESTING)
+            if MODE == "TESTING" and final_cursor_position is not None and frame_count % 5 == 0:
+                scale_stats = calibrator.get_movement_stats() # Obtener estadísticas del calibrador dinámico
+                logger.log_data(
+                    target_pos=current_target, # Punto que el usuario DEBE estar mirando
+                    cursor_pos=final_cursor_position, # Punto donde realmente terminó el cursor
+                    scale_stats=scale_stats
+                )
+            # --- FIN DE MODIFICACIÓN/ADICIÓN CLAVE ---
     if current_fixation:
         fx, fy = current_fixation
         duration = gaze_stabilizer.fixation_detector.current_fixation_frames / 25.0
@@ -237,37 +301,8 @@ while True:
         target_x, target_y = stabilized_gaze  # pantalla completa  
 
 
-    if stabilized_gaze is not None:
-        current_cursor_pos = pyautogui.position()
-        # Obtener la posición actual del cursor
-        # Obtener la posición objetivo del puntero desde el sistema de estabilización
-        target_x = stabilized_gaze[0]
-        target_y = stabilized_gaze[1]
-
-        # 1. Aplicar la limitación de velocidad
-        gain_x = velocidad_h / 50.0  
-        gain_y = velocidad_v / 50.0
-
-        move_x = (target_x - current_cursor_pos[0]) * gain_x
-        move_y = (target_y - current_cursor_pos[1]) * gain_y
-
-        max_move_per_frame = 150 
-        final_move_x = np.clip(move_x, -max_move_per_frame, max_move_per_frame)
-        final_move_y = np.clip(move_y, -max_move_per_frame, max_move_per_frame) 
-
-        # Aplicar movimiento
-        new_x = current_cursor_pos[0] + final_move_x
-        new_y = current_cursor_pos[1] + final_move_y
-
-
-        # 2. Restringir la posición a los límites de la pantalla
-        screen_w, screen_h = pyautogui.size()
-        final_x = int(max(0, min(screen_w - 1, new_x)))
-        final_y = int(max(0, min(screen_h - 1, new_y)))
-
-        # 3. Mover el puntero
-        pyautogui.moveTo(final_x, final_y, duration=0.01, _pause=False)
-
+    
+        
     # Mostrar controles en pantalla
     cv2.putText(frame, "Q: Quit | C: Clear Fixations | R: Recalibrate", 
                (10, frame.shape[0] - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
