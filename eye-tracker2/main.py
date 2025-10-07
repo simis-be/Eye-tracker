@@ -4,12 +4,10 @@ import json
 from pathlib import Path
 import cv2
 from calibration import calibrate_gaze
-from gaze_estimation import project_gaze_trig2, smooth_gaze
-from fixation_map import update_fixation_map, fixation_map
-from utils import set_res, retinal_filter, detect_iris_only_improved, detect_iris_only, detect_individual_eyes
+from fixation_map import fixation_map
+from utils import set_res, retinal_filter, detect_iris_only, detect_individual_eyes
 from dynamic_calibration import ImprovedDynamicCalibrator
 from fixation_map_noise import GazeStabilizer  # Importar tu clase avanzada
-from collections import deque
 import pyautogui
 import time
 import numpy as np

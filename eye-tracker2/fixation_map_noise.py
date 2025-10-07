@@ -3,7 +3,7 @@ from collections import deque
 import time
 import numpy as np
 import cv2
-from collections import deque
+
 
 
 
@@ -242,7 +242,7 @@ class NoiseReducer:
 
 
 
-# En tu archivo fixation_map_noise.py
+
 
 class GazeStabilizer:
     def __init__(self, screen_size=(1920, 1080), sensibilidad_h=50, sensibilidad_v=50):
