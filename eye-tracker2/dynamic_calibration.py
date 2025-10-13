@@ -25,8 +25,8 @@ class ImprovedDynamicCalibrator:
         # Umbrales específicos para cada eje
         self.min_movement_x = 2.0
         self.min_movement_y = 1.0
-        self.max_std_x = 20.0
-        self.max_std_y = 30.0
+        self.max_std_x = 50.0
+        self.max_std_y = 70.0
         
         # Historial para análisis de movimiento
         self.iris_history = []

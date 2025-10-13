@@ -12,7 +12,7 @@ class ImprovedDynamicCalibrator:
         self.scale_y = 12.0
         self.alpha = 0.0 # ❌ Deshabilitado
         
-        # ❌ RANGOS Y LÍMITES DE ESCALA (Irrelevantes en modo estático)
+        
         self.min_scale_x = 2.5
         self.max_scale_x = 80.0
         self.min_scale_y = 4.0
@@ -21,7 +21,7 @@ class ImprovedDynamicCalibrator:
         # Factor de corrección de velocidad global
         self.global_speed_factor = 1.0  # Sin freno. Usar 0.7 si es demasiado rápido.
         
-        # ❌ UMBRALES DE MOVIMIENTO Y RUIDO (Irrelevantes en modo estático)
+       
         self.min_movement_x = 0.2
         self.min_movement_y = 0.1
         self.max_std_x = 50.0
